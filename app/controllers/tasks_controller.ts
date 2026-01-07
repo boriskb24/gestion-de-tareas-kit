@@ -13,8 +13,15 @@ export default class TasksController {
     async store({ request, auth, response }: HttpContext) {
         const user = auth.getUserOrFail()
         const texto = request.input('texto')
+        const fechaTermino = request.input('fechaTermino') || null
 
-        await Task.create({ userId: user.id, texto, completada: false })
+        await Task.create({
+            userId: user.id,
+            texto,
+            completada: false,
+            fechaTermino: fechaTermino,
+            reminderSent: false
+        })
         return response.redirect('/tareas')
     }
 
@@ -22,11 +29,11 @@ export default class TasksController {
     async update({ params, request, response, auth }: HttpContext) {
         const user = auth.getUserOrFail()
         const task = await Task.findOrFail(params.id)
-        
+
         if (task.userId !== user.id) {
             return response.unauthorized('No tienes permiso para modificar esta tarea')
         }
-        
+
         task.completada = request.input('completada')
         await task.save()
         return response.redirect('/tareas')
@@ -36,11 +43,11 @@ export default class TasksController {
     async destroy({ params, response, auth }: HttpContext) {
         const user = auth.getUserOrFail()
         const task = await Task.findOrFail(params.id)
-        
+
         if (task.userId !== user.id) {
             return response.unauthorized('No tienes permiso para eliminar esta tarea')
         }
-        
+
         await task.delete()
         return response.redirect('/tareas')
     }

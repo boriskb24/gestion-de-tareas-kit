@@ -16,6 +16,12 @@ export default class Task extends BaseModel {
     @column()
     declare completada: boolean
 
+    @column.dateTime()
+    declare fechaTermino: DateTime | null
+
+    @column()
+    declare reminderSent: boolean
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime
 
