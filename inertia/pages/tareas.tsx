@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { router } from '@inertiajs/react';
 
 interface Tarea {
@@ -11,45 +11,55 @@ interface Props {
     tareas: Tarea[];
 }
 
-export default function Tareas({ tareas: tareasIniciales }: Props) {
-    const [textoTarea, setTextoTarea] = useState<string>("");
-    const [lista, setLista] = useState<Tarea[]>(tareasIniciales || []);
-
-    useEffect(() => {
-        setLista(tareasIniciales || []);
-    }, [tareasIniciales]);
+export default function Tareas({ tareas }: Props) {
+    const [textoTarea, setTextoTarea] = useState<string>("")
 
     const agregarTarea = () => {
-        if (textoTarea === "") return;
+        if (textoTarea === "") return
 
         router.post('/tareas', { texto: textoTarea }, {
             onSuccess: () => {
-                setTextoTarea("");
-                router.reload();
+                setTextoTarea("")
             }
-        });
-    };
-
+        })
+    }
 
     const toggleCompletada = (id: number, completada: boolean) => {
-        router.put(`/tareas/${id}`, { completada: !completada }, {
-            onSuccess: () => router.reload()
-        });
-    };
+        router.put(`/tareas/${id}`, { completada: !completada })
+    }
 
 
     const borrarTarea = (id: number) => {
-        router.delete(`/tareas/${id}`, {
-            onSuccess: () => router.reload()
-        });
-    };
+        router.delete(`/tareas/${id}`)
+    }
+
+    const cerrarSesion = () => {
+        router.post('/logout')
+    }
 
     return (
         <div>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ position: 'relative', textAlign: 'center' }}>
                 <h1 style={{ padding: '10px', width: 'fit-content', margin: '0 auto' }}>
                     Mis Tareas
                 </h1>
+                <button
+                    onClick={cerrarSesion}
+                    style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '20px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        cursor: 'pointer',
+                        borderRadius: '5px',
+                        fontSize: '14px'
+                    }}
+                >
+                    Cerrar Sesión
+                </button>
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -69,7 +79,7 @@ export default function Tareas({ tareas: tareasIniciales }: Props) {
             </div>
             <div style={{ marginTop: '30px', textAlign: 'center' }}>
                 <ul style={{ listStyleType: 'none', padding: 0 }}>
-                    {lista.map((tarea) => (
+                    {tareas.map((tarea) => (
                         <li key={tarea.id} style={{
                             border: '1px solid gray',
                             padding: '10px',

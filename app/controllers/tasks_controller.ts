@@ -3,41 +3,44 @@ import Task from '#models/task'
 
 export default class TasksController {
     // Mostrar tareas del usuario
-    async index({ session, inertia }: HttpContext) {
-        const userId = session.get('userId')
-
-        if (!userId) {
-            return inertia.render('login')
-        }
-
-        const tareas = await Task.query().where('user_id', userId).orderBy('id', 'desc')
+    async index({ auth, inertia }: HttpContext) {
+        const user = auth.getUserOrFail()
+        const tareas = await Task.query().where('user_id', user.id).orderBy('id', 'desc')
         return inertia.render('tareas', { tareas })
     }
 
     // Crear nueva tarea
-    async store({ request, session, response }: HttpContext) {
-        const userId = session.get('userId')
+    async store({ request, auth, response }: HttpContext) {
+        const user = auth.getUserOrFail()
         const texto = request.input('texto')
 
-        if (!userId) {
-            return response.redirect('/')
-        }
-
-        await Task.create({ userId, texto, completada: false })
+        await Task.create({ userId: user.id, texto, completada: false })
         return response.redirect('/tareas')
     }
 
     // Marcar tarea como completada/no completada
-    async update({ params, request, response }: HttpContext) {
+    async update({ params, request, response, auth }: HttpContext) {
+        const user = auth.getUserOrFail()
         const task = await Task.findOrFail(params.id)
+        
+        if (task.userId !== user.id) {
+            return response.unauthorized('No tienes permiso para modificar esta tarea')
+        }
+        
         task.completada = request.input('completada')
         await task.save()
         return response.redirect('/tareas')
     }
 
     // Borrar tarea
-    async destroy({ params, response }: HttpContext) {
+    async destroy({ params, response, auth }: HttpContext) {
+        const user = auth.getUserOrFail()
         const task = await Task.findOrFail(params.id)
+        
+        if (task.userId !== user.id) {
+            return response.unauthorized('No tienes permiso para eliminar esta tarea')
+        }
+        
         await task.delete()
         return response.redirect('/tareas')
     }

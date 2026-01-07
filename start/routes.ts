@@ -8,18 +8,24 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
+const AuthController = () => import('#controllers/auth_controller')
+const TasksController = () => import('#controllers/tasks_controller')
 
 // Páginas (GET)
-router.on('/').renderInertia('login')
-router.on('/registrarse').renderInertia('registrarse')
+router.group(() => {
+    router.on('/').renderInertia('login')
+    router.on('/registrarse').renderInertia('registrarse')
+}).use(middleware.guest())
 
 // Autenticación (POST)
-const AuthController = () => import('#controllers/auth_controller')
 router.post('/registrar', [AuthController, 'register'])
 router.post('/login', [AuthController, 'login'])
+router.post('/logout', [AuthController, 'logout']).use(middleware.auth())
 
-const TasksController = () => import('#controllers/tasks_controller')
-router.get('/tareas', [TasksController, 'index'])
-router.post('/tareas', [TasksController, 'store'])
-router.put('/tareas/:id', [TasksController, 'update'])
-router.delete('/tareas/:id', [TasksController, 'destroy'])
+router.group(() => {
+    router.get('/tareas', [TasksController, 'index'])
+    router.post('/tareas', [TasksController, 'store'])
+    router.put('/tareas/:id', [TasksController, 'update'])
+    router.delete('/tareas/:id', [TasksController, 'destroy'])
+}).use(middleware.auth())

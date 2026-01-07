@@ -3,13 +3,12 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: tareas_postgres
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: tareas_db
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
