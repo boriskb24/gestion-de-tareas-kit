@@ -7,6 +7,7 @@ export default class AuthController {
      * Registrar un nuevo usuario
      */
     async register({ request, response, session }: HttpContext) {
+        const fullName = request.input('fullName')
         const email = request.input('email')
         const password = request.input('password')
 
@@ -24,6 +25,7 @@ export default class AuthController {
 
         try {
             const user = await User.create({
+                fullName: fullName,
                 email: email,
                 password: password,
             })

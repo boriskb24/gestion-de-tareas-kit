@@ -2,27 +2,29 @@ import { Link, router } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function Registrarse() {
+    const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    // Función para validar y enviar el formulario
     const handleRegistro = () => {
-        // Validación: email debe contener @ y .gmail
+        if (!nombre || nombre.length < 2) {
+            setError('El nombre debe tener al menos 2 caracteres');
+            return;
+        }
+
         if (!email.includes('@gmail.com')) {
             setError('El email debe ser de Gmail (ejemplo: usuario@gmail.com)');
             return;
         }
 
-        // Validación: contraseña no vacía y mínimo 4 caracteres
         if (password.length < 4) {
             setError('La contraseña debe tener al menos 4 caracteres');
             return;
         }
 
-        // Limpiar error y enviar datos al servidor
         setError('');
-        router.post('/registrar', { email, password });
+        router.post('/registrar', { fullName: nombre, email, password });
     };
 
     return (
@@ -50,6 +52,15 @@ export default function Registrarse() {
                     </div>
                 )}
 
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                    <input
+                        type="text"
+                        placeholder="Nombre completo..."
+                        style={{ padding: '8px', width: '250px' }}
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                    />
+                </div>
                 <div style={{ textAlign: 'center', marginTop: '20px' }}>
                     <input
                         type="email"
