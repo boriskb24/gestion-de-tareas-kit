@@ -12,15 +12,13 @@ export default class AuthController {
         const password = request.input('password')
 
         if (!email || !email.includes('@gmail.com')) {
-            return response.badRequest({
-                error: 'El email debe contener @ y ser de gmail (ejemplo: usuario@gmail.com)'
-            })
+            session.flash('error', 'El email debe contener @ y ser de gmail')
+            return response.redirect().back()
         }
 
         if (!password || password.length < 4) {
-            return response.badRequest({
-                error: 'La contraseña debe tener al menos 4 caracteres'
-            })
+            session.flash('error', 'La contraseña debe tener al menos 4 caracteres')
+            return response.redirect().back()
         }
 
         try {
@@ -30,14 +28,11 @@ export default class AuthController {
                 password: password,
             })
 
-            // Guardar userId en la sesión
             session.put('userId', user.id)
-
             return response.redirect('/tareas')
         } catch (error) {
-            return response.badRequest({
-                error: 'El email ya está registrado'
-            })
+            session.flash('error', 'El email ya está registrado')
+            return response.redirect().back()
         }
     }
 
@@ -49,30 +44,25 @@ export default class AuthController {
         const password = request.input('password')
 
         if (!email || !password) {
-            return response.badRequest({
-                error: 'Debes ingresar email y contraseña'
-            })
+            session.flash('error', 'Debes ingresar email y contraseña')
+            return response.redirect().back()
         }
 
         const user = await User.findBy('email', email)
 
         if (!user) {
-            return response.badRequest({
-                error: 'Email no registrado'
-            })
+            session.flash('error', 'Email no registrado')
+            return response.redirect().back()
         }
 
         const isValid = await hash.verify(user.password, password)
 
         if (!isValid) {
-            return response.badRequest({
-                error: 'Contraseña incorrecta'
-            })
+            session.flash('error', 'Contraseña incorrecta')
+            return response.redirect().back()
         }
 
-        // Guardar userId en la sesión
         session.put('userId', user.id)
-
         return response.redirect('/tareas')
     }
 }

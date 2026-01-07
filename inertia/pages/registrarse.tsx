@@ -1,11 +1,25 @@
-import { Link, router } from "@inertiajs/react";
-import { useState } from "react";
+import { Link, router, usePage } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+
+interface PageProps {
+    [key: string]: unknown;
+    flash?: {
+        error?: string;
+    };
+}
 
 export default function Registrarse() {
+    const { props } = usePage<PageProps>();
     const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (props.flash?.error) {
+            setError(props.flash.error);
+        }
+    }, [props.flash]);
 
     const handleRegistro = () => {
         if (!nombre || nombre.length < 2) {

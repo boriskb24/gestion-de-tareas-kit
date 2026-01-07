@@ -1,37 +1,39 @@
-import { Head, Link, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
+import { useState, useEffect } from 'react'
+
+interface PageProps {
+  [key: string]: unknown;
+  flash?: {
+    error?: string;
+  };
+}
 
 export default function Login() {
+  const { props } = usePage<PageProps>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Función para validar y enviar el login
+  // Mostrar error del servidor si existe
+  useEffect(() => {
+    if (props.flash?.error) {
+      setError(props.flash.error);
+    }
+  }, [props.flash]);
+
   const handleLogin = () => {
-    // Validación: email debe ser de gmail
     if (!email.includes('@gmail.com')) {
       setError('El email debe ser de Gmail (ejemplo: usuario@gmail.com)');
       return;
     }
 
-    // Validación: contraseña no vacía
     if (password.length < 4) {
       setError('La contraseña debe tener al menos 4 caracteres');
       return;
     }
 
-    // Limpiar error y enviar datos al servidor
     setError('');
-    router.post('/login', { email, password }, {
-      onError: (errors) => {
-        // Mostrar error del servidor
-        if (errors.error) {
-          setError(errors.error);
-        } else {
-          setError('Usuario no existe o contraseña incorrecta');
-        }
-      }
-    });
+    router.post('/login', { email, password });
   };
 
   return (
@@ -46,7 +48,6 @@ export default function Login() {
           </h1>
         </div>
 
-        {/* Mostrar error si existe */}
         {error && (
           <div style={{
             textAlign: 'center',
