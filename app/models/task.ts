@@ -22,6 +22,18 @@ export default class Task extends BaseModel {
     @column()
     declare reminderSent: boolean
 
+    @column()
+    declare prioridad: 'baja' | 'media' | 'alta'
+
+    @column()
+    declare descripcion: string | null
+
+    @column({
+        prepare: (value: any) => JSON.stringify(value),
+        consume: (value: any) => typeof value === 'string' ? JSON.parse(value) : value,
+    })
+    declare subtasks: { texto: string; completada: boolean }[] | null
+
     @column.dateTime({ autoCreate: true })
     declare createdAt: DateTime
 

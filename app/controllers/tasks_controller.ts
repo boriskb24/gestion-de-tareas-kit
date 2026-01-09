@@ -14,18 +14,20 @@ export default class TasksController {
         const user = auth.getUserOrFail()
         const texto = request.input('texto')
         const fechaTermino = request.input('fechaTermino') || null
+        const prioridad = request.input('prioridad') || 'media'
 
         await Task.create({
             userId: user.id,
             texto,
             completada: false,
             fechaTermino: fechaTermino,
-            reminderSent: false
+            reminderSent: false,
+            prioridad
         })
         return response.redirect('/tareas')
     }
 
-    // Marcar tarea como completada/no completada
+    // Actualizar tarea (completada, texto, fecha, prioridad)
     async update({ params, request, response, auth }: HttpContext) {
         const user = auth.getUserOrFail()
         const task = await Task.findOrFail(params.id)
@@ -34,7 +36,40 @@ export default class TasksController {
             return response.unauthorized('No tienes permiso para modificar esta tarea')
         }
 
-        task.completada = request.input('completada')
+        // Actualizar completada
+        if (request.input('completada') !== undefined) {
+            task.completada = request.input('completada')
+        }
+
+        // Actualizar texto
+        if (request.input('texto')) {
+            task.texto = request.input('texto')
+        }
+
+        // Actualizar fecha de término
+        if (request.input('fechaTermino') !== undefined) {
+            task.fechaTermino = request.input('fechaTermino') || null
+            // Si se cambia la fecha, resetear el recordatorio
+            if (task.fechaTermino) {
+                task.reminderSent = false
+            }
+        }
+
+        // Actualizar prioridad
+        if (request.input('prioridad')) {
+            task.prioridad = request.input('prioridad')
+        }
+
+        // Actualizar descripcion
+        if (request.input('descripcion') !== undefined) {
+            task.descripcion = request.input('descripcion') || null
+        }
+
+        // Actualizar subtasks
+        if (request.input('subtasks') !== undefined) {
+            task.subtasks = request.input('subtasks')
+        }
+
         await task.save()
         return response.redirect('/tareas')
     }
